@@ -1,0 +1,8 @@
+# Nothing to build here — plain static files.
+# OS / editor cruft only.
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.idea/
+.vscode/

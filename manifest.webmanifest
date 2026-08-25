@@ -1,0 +1,25 @@
+{
+  "name": "LiteratureStudy",
+  "short_name": "LitStudy",
+  "description": "A personal database of scientific literature: papers, notes, takeaways, authors and groups — organised by thematic area.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./index.html#/areas",
+  "scope": "./",
+  "id": "literature-study",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1626",
+  "theme_color": "#0e1626",
+  "categories": ["education", "productivity", "science"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Thematic areas", "url": "./index.html#/areas" },
+    { "name": "Authors", "url": "./index.html#/authors" },
+    { "name": "Research groups", "url": "./index.html#/groups" }
+  ]
+}

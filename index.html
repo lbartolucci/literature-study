@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<title>LiteratureStudy</title>
+<meta name="description" content="A personal database of scientific literature: papers, notes, takeaways, authors and groups — organised by thematic area.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1626" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fb" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LitStudy">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div id="app">
+  <header class="app-head" id="head">
+    <h1 id="view-title">LiteratureStudy</h1>
+  </header>
+
+  <main id="view" tabindex="-1">
+    <div class="loading"><span class="loading__spinner"></span>Opening your library…</div>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Main sections">
+  <a href="#/areas" data-tab="areas">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+    Areas</a>
+  <a href="#/authors" data-tab="authors">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+    Authors</a>
+  <a href="#/groups" data-tab="groups">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8.5" r="2.7"/><circle cx="16" cy="8.5" r="2.7"/><path d="M3.5 19a4.5 4.5 0 0 1 9 0M11.5 19a4.5 4.5 0 0 1 9 0"/></svg>
+    Groups</a>
+  <a href="#/settings" data-tab="settings">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/></svg>
+    Settings</a>
+</nav>
+
+<noscript>
+  <p style="padding:24px;font-family:system-ui,sans-serif">
+    LiteratureStudy needs JavaScript to run.
+  </p>
+</noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
