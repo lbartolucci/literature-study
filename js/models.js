@@ -36,7 +36,11 @@ export function newPaper (area) {
     pdfKey: '',                // key into the pdfs store (if a PDF is stored)
     pdfName: '',
     notes: '',                 // personal notes
+    summary: '',               // synthesis: what the authors did (e.g. from /sintesi-lit)
     takeaways: [],             // key takeaways (strings)
+    theme: '',                 // thematic sub-group inside the area (e.g. sintesi-lit theme)
+    projectLinks: [],          // { project, text } — how the paper connects to our projects
+    source: null,              // { kind:'sintesi-lit', file, folder, pdf, importedAt } when imported
     groupRefs: [],             // research group record ids
     referencedWorks: [],       // OpenAlex ids (for Explore)
     relatedWorks: [],          // OpenAlex ids (for Explore)
@@ -50,6 +54,11 @@ export function normalizePaper (p) {
   p.authors = (p.authors || []).map(a => String(a).trim()).filter(Boolean);
   p.keywords = (p.keywords || []).map(k => String(k).trim()).filter(Boolean);
   p.takeaways = (p.takeaways || []).map(t => String(t).trim()).filter(Boolean);
+  p.summary = (p.summary || '').trim();
+  p.theme = (p.theme || '').trim();
+  p.projectLinks = (p.projectLinks || [])
+    .map(l => ({ project: String(l.project || '').trim(), text: String(l.text || '').trim() }))
+    .filter(l => l.text);
   p.doi = (p.doi || '').trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '').toLowerCase();
   p.year = p.year ? parseInt(p.year, 10) || null : null;
   // search indexes for IndexedDB multiEntry

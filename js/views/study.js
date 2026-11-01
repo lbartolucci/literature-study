@@ -4,7 +4,7 @@ import { go } from '../router.js';
 import { qs, qsa, toast, download, copyText, confirmDialog } from '../ui.js';
 import { esc, fmtDate, uid, answerAcceptable } from '../utils/text.js';
 import { voicebarHTML, attachDictation } from '../dictation.js';
-import { generate, availability, TYPE_LABEL } from '../quiz/generator.js';
+import { generate, availability, TYPE_LABEL, themesOf } from '../quiz/generator.js';
 
 export default function studyView ({ area }) {
   const a = findArea(area);
@@ -25,8 +25,12 @@ export default function studyView ({ area }) {
         <p class="muted small" style="margin:0 0 12px">Questions are built from your papers, notes, takeaways, authors and groups in <b>${esc(a.name)}</b>. ${papersInArea(area).length} paper(s) available.</p>
         <div class="field">
           <label for="q-count">Number of questions</label>
-          <select id="q-count">${[5, 8, 10, 15, 20].map(n => `<option value="${n}" ${n === 8 ? 'selected' : ''}>${n}</option>`).join('')}</select>
+          <select id="q-count">${[5, 8, 10, 15, 20, 30, 50].map(n => `<option value="${n}" ${n === 8 ? 'selected' : ''}>${n}</option>`).join('')}</select>
         </div>
+        ${themesOf(area).length ? `<div class="field">
+          <label for="q-theme">Focus on theme</label>
+          <select id="q-theme"><option value="">All themes</option>${themesOf(area).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}</select>
+        </div>` : ''}
         <div class="btn-row" style="margin-bottom:6px">
           <label class="chip chip--tap"><input type="checkbox" id="q-mc" checked style="margin-right:6px">Multiple choice</label>
           <label class="chip chip--tap"><input type="checkbox" id="q-open" checked style="margin-right:6px">Open answer</label>
@@ -84,9 +88,9 @@ export default function studyView ({ area }) {
           const includeMC = qs('#q-mc', host).checked;
           const includeOpen = qs('#q-open', host).checked;
           if (!includeMC && !includeOpen) { toast('Pick at least one question style.', 'info'); return; }
-          const questions = generate(area, { count, includeMC, includeOpen });
+          const questions = generate(area, { count, includeMC, includeOpen, theme: (host.querySelector('#q-theme') || {}).value || '' });
           if (!questions.length) { toast('Not enough material yet. Add papers, notes and takeaways first.', 'info', 5000); return; }
-          current = { id: uid('s'), area, createdAt: new Date().toISOString(), config: { count, includeMC, includeOpen }, questions, answers: {} };
+          current = { id: uid('s'), area, createdAt: new Date().toISOString(), config: { count, includeMC, includeOpen, theme: (host.querySelector('#q-theme') || {}).value || '' }, questions, answers: {} };
           host.innerHTML = runHtml(current);
           if (dictCleanup) dictCleanup();
           dictCleanup = attachDictation(host, { punctuation: state.settings.dictationPunctuation });

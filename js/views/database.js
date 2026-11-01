@@ -15,7 +15,10 @@ export default function databaseView ({ area }) {
       normalize(p.title).includes(f) ||
       (p.authors || []).some(au => normalize(au).includes(f)) ||
       (p.keywords || []).some(k => normalize(k).includes(f)) ||
-      normalize(p.notes).includes(f));
+      normalize(p.notes).includes(f) ||
+      normalize(p.summary).includes(f) ||
+      normalize(p.theme).includes(f) ||
+      (p.projectLinks || []).some(l => normalize(l.project).includes(f) || normalize(l.text).includes(f)));
     papers.sort((x, y) => (y.updatedAt || '').localeCompare(x.updatedAt || ''));
 
     if (!papers.length) {
@@ -34,6 +37,8 @@ export default function databaseView ({ area }) {
     else if (p.oaUrl) badges.push('<span class="chip oa-badge">OA</span>');
     if ((p.takeaways || []).length) badges.push(`<span class="chip chip--accent">${p.takeaways.length} takeaway${p.takeaways.length === 1 ? '' : 's'}</span>`);
     if (nLinks) badges.push(`<span class="chip">${nLinks} link${nLinks === 1 ? '' : 's'}</span>`);
+    if (p.theme) badges.push(`<span class="chip">${esc(p.theme.length > 34 ? p.theme.slice(0, 33) + '…' : p.theme)}</span>`);
+    (p.projectLinks || []).forEach(l => { if (l.project) badges.push(`<span class="chip chip--teal">${esc(l.project.toUpperCase())}</span>`); });
     if (p.demo) badges.push('<span class="chip">demo</span>');
     return `
       <a class="paper-item" href="#/area/${esc(area)}/paper/${esc(p.id)}">
@@ -47,7 +52,7 @@ export default function databaseView ({ area }) {
     <div class="section-toolbar">
       <div class="search-box">
         <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
-        <input type="search" id="q" placeholder="Search title, author, keyword, notes…" autocomplete="off">
+        <input type="search" id="q" placeholder="Search title, author, keyword, theme, project…" autocomplete="off">
       </div>
     </div>
     <div id="list-host">${render('')}</div>

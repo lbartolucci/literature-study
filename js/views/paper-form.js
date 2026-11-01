@@ -81,6 +81,21 @@ export default function paperForm ({ area, id, edit }) {
 
     <div class="card">
       <div class="field">
+        <label for="f-summary">Summary</label>
+        <textarea id="f-summary" placeholder="What the authors did (filled automatically by literature-synthesis imports)">${esc(working.summary || '')}</textarea>
+      </div>
+      <div class="field">
+        <label for="f-theme">Theme</label>
+        <input type="text" id="f-theme" value="${esc(working.theme || '')}" placeholder="Sub-topic inside this area">
+      </div>
+      <div class="field">
+        <label for="f-projlinks">Connection to our projects</label>
+        <textarea id="f-projlinks" placeholder="One per line, e.g.  NEREUS: why it matters for the project">${esc((working.projectLinks || []).map(l => (l.project ? l.project.toUpperCase() + ': ' : '') + l.text).join('\n'))}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
         <label for="f-notes">Your notes</label>
         <textarea id="f-notes" placeholder="What matters here, how it connects to your work…">${esc(working.notes)}</textarea>
         ${voicebarHTML({ field: 'f-notes' })}
@@ -215,6 +230,12 @@ export default function paperForm ({ area, id, edit }) {
         working.keywords = qs('#f-keywords', root).value.split(',').map(s => s.trim()).filter(Boolean);
         working.abstract = qs('#f-abstract', root).value.trim();
         working.notes = qs('#f-notes', root).value.trim();
+        working.summary = qs('#f-summary', root).value.trim();
+        working.theme = qs('#f-theme', root).value.trim();
+        working.projectLinks = qs('#f-projlinks', root).value.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+          const m = line.match(/^([A-Za-z0-9_\- ]{2,30}):\s*(.+)$/);
+          return m ? { project: m[1].trim().toLowerCase(), text: m[2].trim() } : { project: '', text: line };
+        });
         working.takeaways = takeaways.slice();
         const groupName = qs('#f-group', root).value.trim();
 

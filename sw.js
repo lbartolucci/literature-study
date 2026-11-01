@@ -8,7 +8,7 @@
    such as https://user.github.io/literature-study/.
    ========================================================================= */
 
-const VERSION = 'v1.1.0';   // + Supabase cloud sync
+const VERSION = 'v1.2.0';   // + literature-synthesis fields & quiz types
 const SHELL_CACHE = `shell-${VERSION}`;
 
 const SHELL = [

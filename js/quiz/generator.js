@@ -35,6 +35,9 @@ export function availability (areaId) {
   const withAuthors = ps.filter(p => (p.authors || []).length);
   const withYear = ps.filter(p => p.year);
   const withKeywords = ps.filter(p => (p.keywords || []).length || (p.concepts || []).length);
+  const withSummary = ps.filter(p => (p.summary || '').trim().length >= 60);
+  const withProject = ps.filter(p => (p.projectLinks || []).some(l => (l.text || '').trim().length >= 20));
+  const themes = new Set(ps.map(p => p.theme).filter(Boolean));
 
   const info = {};
   const ok = {};
@@ -48,6 +51,11 @@ export function availability (areaId) {
   mark('takeaway-open', withTakeaways.length >= 1, 'no paper has a key takeaway written');
   mark('notes-open', withNotes.length >= 1, 'no paper has personal notes written');
   mark('cloze', withTakeaways.length >= 1, 'need a takeaway of a few words');
+  mark('which-summary', ps.length >= 3 && withSummary.length >= 1, 'need at least 3 papers, one with a summary');
+  mark('takeaway-mc', withTakeaways.length >= 4, 'need at least 4 papers with takeaways');
+  mark('theme-of', themes.size >= 3, 'need papers spread over at least 3 themes');
+  mark('project-which', ps.length >= 3 && withProject.length >= 1, 'no paper has a project connection yet');
+  mark('project-open', withProject.length >= 1, 'no paper has a project connection yet');
 
   return { ok, info, counts: { papers: ps.length, authors: authorsN, withNotes: withNotes.length, withTakeaways: withTakeaways.length } };
 }
@@ -156,6 +164,65 @@ function qCloze (p) {
     prompt: `Fill the gap in your takeaway for “${p.title}”:`, context: masked, answer };
 }
 
+function qWhichSummary (p, ps) {
+  if ((p.summary || '').length < 60) return null;
+  const titles = ps.map(x => x.title).filter(Boolean);
+  if (titles.length < 3) return null;
+  return {
+    id: uid('q'), kind: 'mc', type: 'which-summary', paperId: p.id,
+    prompt: 'Which paper does this summary describe?',
+    context: snippet(p.summary, words(p.title)),
+    options: fourOptions(p.title, titles), answer: p.title
+  };
+}
+
+function qTakeawayMC (p, ps) {
+  const own = (p.takeaways || []).filter(t => t.trim().length >= 20);
+  if (!own.length) return null;
+  const correct = pick(own);
+  const pool = [];
+  ps.forEach(x => { if (x.id !== p.id) (x.takeaways || []).forEach(t => { if (t.trim().length >= 20) pool.push(t); }); });
+  if (pool.length < 3) return null;
+  return {
+    id: uid('q'), kind: 'mc', type: 'takeaway-mc', paperId: p.id,
+    prompt: `Which of these is a key takeaway of “${p.title}”?`,
+    options: fourOptions(correct, [correct, ...pool]), answer: correct
+  };
+}
+
+function qThemeOf (p, ps) {
+  if (!p.theme) return null;
+  const pool = [...new Set(ps.map(x => x.theme).filter(Boolean))];
+  if (pool.length < 3) return null;
+  return {
+    id: uid('q'), kind: 'mc', type: 'theme-of', paperId: p.id,
+    prompt: `Under which theme did you file “${p.title}”?`,
+    options: fourOptions(p.theme, pool), answer: p.theme
+  };
+}
+
+function projectLink (p) { return (p.projectLinks || []).find(l => (l.text || '').trim().length >= 20); }
+
+function qProjectWhich (p, ps) {
+  const l = projectLink(p);
+  if (!l) return null;
+  const titles = ps.map(x => x.title).filter(Boolean);
+  if (titles.length < 3) return null;
+  return {
+    id: uid('q'), kind: 'mc', type: 'project-which', paperId: p.id,
+    prompt: `Which paper supports this point for ${l.project ? l.project.toUpperCase() : 'our project'}?`,
+    context: snippet(l.text, words(p.title)),
+    options: fourOptions(p.title, titles), answer: p.title
+  };
+}
+
+function qProjectOpen (p) {
+  const l = projectLink(p);
+  if (!l) return null;
+  return { id: uid('q'), kind: 'open', type: 'project-open', paperId: p.id,
+    prompt: `Why does “${p.title}” matter for ${l.project ? l.project.toUpperCase() : 'our project'}?`, answer: l.text };
+}
+
 /* --------------------------------------------------------------- assemble */
 
 const BUILDERS = {
@@ -166,21 +233,30 @@ const BUILDERS = {
   'group-of': (ps) => ps.map(qGroupOf),
   'takeaway-open': (ps) => ps.map(qTakeawayOpen),
   'notes-open': (ps) => ps.map(qNotesOpen),
-  'cloze': (ps) => ps.map(qCloze)
+  'cloze': (ps) => ps.map(qCloze),
+  'which-summary': (ps) => ps.map(p => qWhichSummary(p, ps)),
+  'takeaway-mc': (ps) => ps.map(p => qTakeawayMC(p, ps)),
+  'theme-of': (ps) => ps.map(p => qThemeOf(p, ps)),
+  'project-which': (ps) => ps.map(p => qProjectWhich(p, ps)),
+  'project-open': (ps) => ps.map(qProjectOpen)
 };
 
 /** Generate a quiz.
  *  opts: { count, includeOpen, includeMC, focus: 'all'|'notes' } */
-export function generate (areaId, { count = 8, includeOpen = true, includeMC = true } = {}) {
-  const ps = papersInArea(areaId);
+export function generate (areaId, { count = 8, includeOpen = true, includeMC = true, theme = '' } = {}) {
+  const all = papersInArea(areaId);
+  // A theme focuses which papers are ASKED about; distractors still come from the whole area.
+  const focus = theme ? all.filter(p => p.theme === theme) : all;
+  const ps = all;
   const avail = availability(areaId);
   let bag = [];
   for (const [type, builder] of Object.entries(BUILDERS)) {
     if (!avail.ok[type]) continue;
-    const isOpen = ['takeaway-open', 'notes-open', 'cloze', 'group-of'].includes(type);
+    const isOpen = ['takeaway-open', 'notes-open', 'cloze', 'group-of', 'project-open'].includes(type);
     if (isOpen && !includeOpen) continue;
     if (!isOpen && !includeMC) continue;
-    bag.push(...builder(ps).filter(Boolean));
+    const focusIds = new Set(focus.map(p => p.id));
+    bag.push(...builder(ps).filter(q => q && focusIds.has(q.paperId)));
   }
   // de-duplicate identical prompts, shuffle, and cap
   const seen = new Set();
@@ -191,5 +267,12 @@ export function generate (areaId, { count = 8, includeOpen = true, includeMC = t
 export const TYPE_LABEL = {
   'author-of': 'Author', 'which-paper': 'Identify paper', 'metadata': 'Metadata',
   'concept': 'Key concept', 'group-of': 'Research group', 'takeaway-open': 'Takeaway',
-  'notes-open': 'Your notes', 'cloze': 'Fill the gap'
+  'notes-open': 'Your notes', 'cloze': 'Fill the gap',
+  'which-summary': 'Identify from summary', 'takeaway-mc': 'Spot the takeaway', 'theme-of': 'Theme',
+  'project-which': 'Project connection', 'project-open': 'Why it matters for the project'
 };
+
+/** Distinct themes in an area (for the Study focus selector). */
+export function themesOf (areaId) {
+  return [...new Set(papersInArea(areaId).map(p => p.theme).filter(Boolean))].sort();
+}

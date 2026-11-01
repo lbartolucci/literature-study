@@ -26,6 +26,10 @@ export default function paperView ({ area, id }) {
       ? `<div>${p.takeaways.map(t => `<div class="takeaway-item">${esc(t)}</div>`).join('')}</div>`
       : '<p class="muted small">No takeaways yet.</p>';
 
+    const projLinks = (p.projectLinks || []).map(l => `<div class="takeaway-item"><div><strong>${esc((l.project || 'Project').toUpperCase())}</strong><br>${esc(l.text)}</div></div>`).join('');
+    const srcLine = p.source && p.source.kind === 'sintesi-lit'
+      ? `<p class="muted small">Imported from literature synthesis${p.source.folder ? ' · ' + esc(p.source.folder) : ''}${p.source.importedAt ? ' · ' + esc(fmtDate(p.source.importedAt)) : ''}</p>` : '';
+
     const links = linksOf(p.id);
     const linksHtml = links.length ? links.map(l => {
       const otherId = l.aId === p.id ? l.bId : l.aId;
@@ -49,17 +53,23 @@ export default function paperView ({ area, id }) {
       <div class="detail-title">${esc(p.title)}</div>
       <div class="detail-meta">${p.year ? p.year + ' · ' : ''}${p.venue ? esc(p.venue) : ''}${p.type ? ' · ' + esc(p.type) : ''}</div>
       <div class="chips" style="margin:10px 0">${authorsHtml}${groupsHtml}</div>
+      ${p.theme ? `<div class="chips" style="margin:0 0 10px"><span class="chip chip--accent">${esc(p.theme)}</span></div>` : ''}
 
       <div class="btn-row" style="margin:12px 0">
         ${pdfBtn} ${doiLink} ${oaLink}
       </div>
 
-      ${p.abstract ? `<div class="detail-section"><h3>Abstract</h3><p class="abstract">${esc(p.abstract)}</p></div>` : ''}
+      ${p.summary ? `<div class="detail-section"><h3>Summary</h3><p class="prose">${esc(p.summary)}</p>${srcLine}</div>` : ''}
+
 
       <div class="detail-section"><h3>Your notes</h3>
         ${p.notes ? `<p class="prose">${esc(p.notes)}</p>` : '<p class="muted small">No notes yet.</p>'}</div>
 
       <div class="detail-section"><h3>Key takeaways</h3>${takeaways}</div>
+
+      ${projLinks ? `<div class="detail-section"><h3>Connection to our projects</h3>${projLinks}</div>` : ''}
+
+      ${p.abstract ? `<div class="detail-section"><h3>Abstract</h3><p class="abstract">${esc(p.abstract)}</p></div>` : ''}
 
       ${keywords ? `<div class="detail-section"><h3>Keywords</h3><div class="chips">${keywords}</div></div>` : ''}
 

@@ -363,3 +363,6 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
 .divider { height: 1px; background: var(--line); margin: 16px 0; border: 0; }
 .spinner-inline { display: inline-block; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--line-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; vertical-align: -2px; }
 code.inline { background: var(--bg-soft); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+
+/* v1.2 — long tokens (URLs, formulas) in imported text must wrap on phones */
+.abstract, .prose, .takeaway-item, .detail-title { overflow-wrap: anywhere; }
