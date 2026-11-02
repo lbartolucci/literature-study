@@ -6,7 +6,7 @@
    ========================================================================= */
 
 const DB_NAME = 'literature-study';
-const DB_VERSION = 1;
+const DB_VERSION = 2;   // v2: + reviews store (spaced-repetition state)
 
 /** Logical schema version (written into backups). Bump when record shapes
  *  change, not when the app changes. */
@@ -37,6 +37,10 @@ const STORES = {
   sessions: { keyPath: 'id', indexes: [      // saved Study quizzes
     ['area', 'area'],
     ['createdAt', 'createdAt']
+  ]},
+  reviews: { keyPath: 'id', indexes: [       // spaced-repetition state, one per paper (id = paper id)
+    ['area', 'area'],
+    ['due', 'due']
   ]},
   dismissed: { keyPath: 'id' },              // Explore suggestions the user rejected
   cache: { keyPath: 'key' },                 // OpenAlex responses with expiry

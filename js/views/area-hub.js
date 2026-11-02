@@ -22,6 +22,7 @@ export default function hubView ({ area }) {
   const ICONS = {
     db: '<svg class="ico" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>',
     study: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 4 3 8l9 4 9-4-9-4Z"/><path d="M7 10.5V15c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4.5M21 8v5"/></svg>',
+    quiz: '<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4M12 16.6v.4"/></svg>',
     explore: '<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.6 8.4-2.1 5.1-5.1 2.1 2.1-5.1 5.1-2.1Z"/></svg>'
   };
 
@@ -39,7 +40,8 @@ export default function hubView ({ area }) {
 
   const html = `
     ${section(`#/area/${esc(area)}/database`, ICONS.db, 'Database', 'Add papers, notes, takeaways and links.', c.papers)}
-    ${section(`#/area/${esc(area)}/study`, ICONS.study, 'Study', 'Quizzes from your papers and notes. Export to verify in chat.', c.sessions || null)}
+    ${section(`#/area/${esc(area)}/study`, ICONS.study, 'Study', 'Review paper cards on a spaced schedule, then a quiz on what you just studied.', c.due || null)}
+    ${section(`#/area/${esc(area)}/quiz`, ICONS.quiz, 'Quiz', 'Free quizzes on the whole area, past quizzes and export for chat.', c.sessions || null)}
     ${section(`#/area/${esc(area)}/explore`, ICONS.explore, 'Explore', 'Find new papers via OpenAlex, based on what you saved.', null)}
     ${recentHtml}`;
 

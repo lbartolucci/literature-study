@@ -33,7 +33,7 @@ export async function importBackup (file, { merge = true } = {}) {
   if (d.pdfs) for (const rec of d.pdfs) {
     if (rec.blobBase64) { rec.blob = base64ToBlob(rec.blobBase64, rec.type || 'application/pdf'); delete rec.blobBase64; }
   }
-  for (const name of ['authors', 'groups', 'papers', 'links', 'sessions', 'dismissed', 'pdfs']) {
+  for (const name of ['authors', 'groups', 'papers', 'links', 'sessions', 'reviews', 'dismissed', 'pdfs']) {
     if (Array.isArray(d[name])) await db.putMany(name, d[name]);
   }
   if (Array.isArray(d.meta)) for (const m of d.meta) await db.put('meta', m);

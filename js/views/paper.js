@@ -6,6 +6,8 @@ import { qs, qsa, toast, openSheet, confirmDialog } from '../ui.js';
 import { esc, fmtDate } from '../utils/text.js';
 import { LINK_KINDS } from '../models.js';
 import { getPdf } from '../db.js';
+import { level, intervalLabel } from '../srs.js';
+import { review as findReview } from '../store.js';
 
 export default function paperView ({ area, id }) {
   const a = findArea(area);
@@ -54,6 +56,7 @@ export default function paperView ({ area, id }) {
       <div class="detail-meta">${p.year ? p.year + ' · ' : ''}${p.venue ? esc(p.venue) : ''}${p.type ? ' · ' + esc(p.type) : ''}</div>
       <div class="chips" style="margin:10px 0">${authorsHtml}${groupsHtml}</div>
       ${p.theme ? `<div class="chips" style="margin:0 0 10px"><span class="chip chip--accent">${esc(p.theme)}</span></div>` : ''}
+      ${studyLine(p)}
 
       <div class="btn-row" style="margin:12px 0">
         ${pdfBtn} ${doiLink} ${oaLink}
@@ -141,4 +144,12 @@ function addLinkSheet (area, p, onDone) {
     await addLink(area, p.id, target, kind, note);
     close(); toast('Link added.', 'ok'); onDone();
   });
+}
+
+function studyLine (p) {
+  const r = findReview(p.id);
+  if (!r || !r.reps) return '<p class="muted small" style="margin:0 0 6px">Study: not studied yet.</p>';
+  const lv = level(r);
+  const due = r.due ? fmtDate(r.due) : '';
+  return `<p class="muted small" style="margin:0 0 6px">Study: <b>${lv.label}</b>${r.interval ? ` · interval ${intervalLabel(r.interval)}` : ''} · next review ${esc(due)}${r.quizMiss ? ' · <span style="color:var(--rose)">missed in last quiz</span>' : ''}</p>`;
 }

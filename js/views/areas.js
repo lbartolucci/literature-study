@@ -20,7 +20,7 @@ export default function areasView () {
   const html = `
     <p class="muted small" style="margin:2px 0 14px">
       Your private literature database. Pick a thematic area — each has its own
-      <b>Database</b>, <b>Study</b> and <b>Explore</b>.
+      <b>Database</b>, <b>Study</b>, <b>Quiz</b> and <b>Explore</b>.
     </p>
     <div class="area-grid">${cards}</div>
     <div class="stat-row" style="margin-top:20px">

@@ -8,7 +8,7 @@
    such as https://user.github.io/literature-study/.
    ========================================================================= */
 
-const VERSION = 'v1.2.0';   // + literature-synthesis fields & quiz types
+const VERSION = 'v1.3.0';   // + spaced-repetition Study, post-study Quiz
 const SHELL_CACHE = `shell-${VERSION}`;
 
 const SHELL = [
@@ -29,12 +29,17 @@ const SHELL = [
   './js/demo.js',
   './js/utils/text.js',
   './js/quiz/generator.js',
+  './js/quiz/review.js',
+  './js/quiz/runner.js',
+  './js/quiz/export.js',
+  './js/srs.js',
   './js/views/areas.js',
   './js/views/area-hub.js',
   './js/views/database.js',
   './js/views/paper.js',
   './js/views/paper-form.js',
   './js/views/study.js',
+  './js/views/quiz.js',
   './js/views/explore.js',
   './js/views/authors.js',
   './js/views/author.js',

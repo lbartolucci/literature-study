@@ -25,7 +25,7 @@ import * as db from './db.js';
 import * as store from './store.js';
 
 const APP = 'literature-study';
-const COLLECTIONS = ['papers', 'authors', 'groups', 'links', 'sessions'];
+const COLLECTIONS = ['papers', 'authors', 'groups', 'links', 'sessions', 'reviews'];
 // Initial pull cursor: strictly BELOW any record timestamp (pull uses gt.).
 const EPOCH = '1970-01-01T00:00:00.000Z';
 // Stable sentinel for records that carry no usable timestamp (e.g. old or
@@ -282,7 +282,7 @@ export function initAutoSync () {
   window.addEventListener('offline', () => setStatus({ state: 'offline' }));
   // sync shortly after any data mutation
   store.subscribe((type) => {
-    if (typeof type === 'string' && /paper|author|group|link|session/.test(type)) scheduleAutoSync();
+    if (typeof type === 'string' && /paper|author|group|link|session|review/.test(type)) scheduleAutoSync();
   });
   if (isConfigured() && currentUser()) { setStatus({ email: currentUser().email }); scheduleAutoSync(1200); }
   else if (isConfigured()) setStatus({ state: 'logged-out' });

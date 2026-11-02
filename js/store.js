@@ -15,7 +15,7 @@ import { normalize, slug } from './utils/text.js';
 export { ValidationError };
 
 export const state = {
-  papers: [], authors: [], groups: [], links: [], sessions: [], dismissed: [],
+  papers: [], authors: [], groups: [], links: [], sessions: [], reviews: [], dismissed: [],
   settings: {}, areas: [], loaded: false
 };
 
@@ -26,11 +26,11 @@ function announce (type, detail) { listeners.forEach(fn => { try { fn(type, deta
 
 /* ------------------------------------------------------------- loading -- */
 export async function load () {
-  const [papers, authors, groups, links, sessions, dismissed, settings, areas] = await Promise.all([
+  const [papers, authors, groups, links, sessions, reviews, dismissed, settings, areas] = await Promise.all([
     db.all('papers'), db.all('authors'), db.all('groups'), db.all('links'),
-    db.all('sessions'), db.all('dismissed'), db.settings(), db.areas()
+    db.all('sessions'), db.all('reviews'), db.all('dismissed'), db.settings(), db.areas()
   ]);
-  Object.assign(state, { papers, authors, groups, links, sessions, dismissed, settings, areas, loaded: true });
+  Object.assign(state, { papers, authors, groups, links, sessions, reviews, dismissed, settings, areas, loaded: true });
   announce('loaded');
   return state;
 }
@@ -45,7 +45,10 @@ export const papersByAuthor = authorId => state.papers.filter(p => (p.authorRefs
 export const papersByGroup = groupId => state.papers.filter(p => (p.groupRefs || []).includes(groupId));
 export function areaCounts (areaId) {
   const ps = papersInArea(areaId);
-  return { papers: ps.length, sessions: state.sessions.filter(s => s.area === areaId).length };
+  const endOfDay = new Date(); endOfDay.setHours(23, 59, 59, 999);
+  const ids = new Set(ps.map(p => p.id));
+  const due = state.reviews.filter(r => ids.has(r.id) && r.due && Date.parse(r.due) <= endOfDay.getTime()).length;
+  return { papers: ps.length, sessions: state.sessions.filter(s => s.area === areaId).length, due };
 }
 
 /* -------------------------------------------------------------- papers -- */
@@ -66,6 +69,7 @@ export async function deletePaper (id) {
   await db.deletePaperCascade(id, p && p.pdfKey);
   state.papers = state.papers.filter(x => x.id !== id);
   state.links = state.links.filter(l => l.aId !== id && l.bId !== id);
+  if (review(id)) { await db.del('reviews', id).catch(() => {}); state.reviews = state.reviews.filter(r => r.id !== id); }
   announce('paper-deleted', id);
 }
 
@@ -167,6 +171,18 @@ export async function deleteSession (id) {
   await db.del('sessions', id);
   state.sessions = state.sessions.filter(x => x.id !== id);
   announce('session-deleted', id);
+}
+
+/* ------------------------------------------------------------- reviews -- */
+/** Spaced-repetition state of a paper (id = paper id), or null if never studied. */
+export const review = paperId => state.reviews.find(r => r.id === paperId) || null;
+export async function saveReview (r) {
+  r.updatedAt = new Date().toISOString();
+  await db.put('reviews', r);
+  const i = state.reviews.findIndex(x => x.id === r.id);
+  if (i >= 0) state.reviews[i] = r; else state.reviews.push(r);
+  announce('review', r);
+  return r;
 }
 
 /* ------------------------------------------------------------ dismissed - */
